@@ -1,5 +1,5 @@
 #!/bin/bash
-PATH=${PWD}
+ROOT_PATH=${PWD}
 USER=www-data
 GROUP=www-data
 CHGRP=/bin/chgrp
@@ -24,10 +24,10 @@ fi
 if [ "$1" == "." ]; then
    shift
 elif [ "$1" == ".." ]; then
-   PATH=`$READLINK -f $1`
+   ROOT_PATH=`$READLINK -f $1`
    shift
 elif [ -e "$1" ]; then
-   PATH="$1"
+   ROOT_PATH="$1"
    shift
 fi
 
@@ -55,26 +55,26 @@ if ! /bin/grep "^${GROUP}" /etc/group > /dev/null; then
 fi
 
 if [ $PROMPT -eq 1 ]; then
-   read -p "CONFIRM : rights ($USER:$GROUP) to $PATH [Enter to continue or Ctrl-C to abort] ..."
+   read -p "CONFIRM : rights ($USER:$GROUP) to $ROOT_PATH [Enter to continue or Ctrl-C to abort] ..."
 fi
 
-if [ -d "$PATH" ]; then
-   echo "Settings recursive rights ($USER:$GROUP) to $PATH directory"
-   if ! $CHOWN -R $USER:$GROUP $PATH; then
+if [ -d "$ROOT_PATH" ]; then
+   echo "Settings recursive rights ($USER:$GROUP) to $ROOT_PATH directory"
+   if ! $CHOWN -R $USER:$GROUP $ROOT_PATH; then
       echo "ERROR: Can not change ownership"
       exit 1
    fi
-   $FIND $PATH -type d -print0 | $XARGS -0 -r $CHMOD u+rwx,g+rwx,o-rwx
-   $FIND $PATH -type f -print0 | $XARGS -0 -r $CHMOD u+rw,g+rw,o-rwx
+   $FIND $ROOT_PATH -type d -print0 | $XARGS -0 -r $CHMOD u+rwx,g+rwx,o-rwx
+   $FIND $ROOT_PATH -type f -print0 | $XARGS -0 -r $CHMOD u+rw,g+rw,o-rwx
 
-elif [ -f "$PATH" ]; then
-   echo "Settings rights ($USER:$GROUP) to $PATH file"
-   if ! $CHOWN $USER:$GROUP $PATH; then
+elif [ -f "$ROOT_PATH" ]; then
+   echo "Settings rights ($USER:$GROUP) to $ROOT_PATH file"
+   if ! $CHOWN $USER:$GROUP $ROOT_PATH; then
       echo "ERROR: Can not change ownership"
    exit 1
    fi
-   $CHMOD u+rw,g+rw,o-rwx $PATH
+   $CHMOD u+rw,g+rw,o-rwx $ROOT_PATH
 
 else
-   echo "ERROR: $PATH is not a regular file or directory"
+   echo "ERROR: $ROOT_PATH is not a regular file or directory"
 fi
